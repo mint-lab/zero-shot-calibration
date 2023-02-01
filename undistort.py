@@ -1,14 +1,21 @@
+import argparse
 import numpy as np
 import cv2
 from copy import deepcopy
 
 if __name__ == '__main__':
-    # d_image = cv2.imread('20210812_084000_000_0400.png')
-    # d_image = cv2.imread('20210812_084000_000_0500.png')
-    d_image = cv2.imread('20210812_084000_000_0600.png')
-    # d_image = cv2.imread('20210812_084000_000_0700.png')
-    focal = 1021.9253974248712
-    height, width, channel = d_image.shape
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input_image', type=str, default='20210812_084000_000_0000.png')
+    parser.add_argument('--focal', type=float, default=1021.9253974248712)
+    parser.add_argument('--output_image', type=str, default='output.png')
+    args = parser.parse_args()
+
+    image_path = args.image
+    focal = args.focal
+    output_image = args.output_image
+
+    d_image = cv2.imread(image_path)
+    height, width, _ = d_image.shape
     cx, cy = (width - 1) / 2, (height - 1) / 2
 
     u_image = deepcopy(d_image)
@@ -38,7 +45,6 @@ if __name__ == '__main__':
     resized_image = cv2.resize(stacked_image, dsize=(0, 0), fx=0.4, fy=0.4)
 
     # cv2.imshow('compare image', resized_image)
-    print(rd/ru)
     # cv2.waitKey(0)
 
-    cv2.imwrite('cam3_undistorted_v2.png', stacked_image)
+    cv2.imwrite(output_image, stacked_image)
