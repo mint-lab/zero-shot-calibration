@@ -10,7 +10,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_image', type=str, default='output.png')
     args = parser.parse_args()
 
-    image_path = args.image
+    image_path = args.input_image
     focal = args.focal
     output_image = args.output_image
 
@@ -27,7 +27,6 @@ if __name__ == '__main__':
             y_nu = (y - cy) / focal
 
             # calc radial distortion coeff
-            # theta = np.arctan(np.sqrt(x_nu ** 2 + y_nu ** 2))
             ru = np.sqrt(x_nu ** 2 + y_nu ** 2) # tan(theta) = np.sqrt(x_nu ** 2 + y_nu ** 2)
             rd = np.arctan(ru)
 

@@ -50,4 +50,12 @@ python3 undistort.py --input_image 20210812_084000_000_0400.png --output_image u
 then it will save the undistorted image.
 
 Example result:
-![test_image](cam3_undistorted_v2.png)
+<!-- ![test_image](20210812_084000_000_0400_undistort.png)
+![test_image](20210812_084000_000_0500_undistort.png)
+![test_image](20210812_084000_000_0600_undistort.png)
+![test_image](20210812_084000_000_0700_undistort.png) -->
+
+<img src="20210812_084000_000_0400_undistort.png" align="left"  width = "50%" height = "50%">
+<img src="20210812_084000_000_0500_undistort.png" align="right" width = "50%" height = "50%">
+<img src="20210812_084000_000_0600_undistort.png" align="left"  width = "50%" height = "50%">
+<img src="20210812_084000_000_0700_undistort.png" align="right" width = "50%" height = "50%">

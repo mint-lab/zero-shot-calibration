@@ -38,8 +38,12 @@ if __name__ == '__main__':
     W, H = arg.Width, arg.Height
     cx, cy = (W - 1) / 2, (H - 1) / 2
     theta_h, theta_v = np.deg2rad(arg.Hfov), np.deg2rad(arg.Vfov)
-    focal = 1000.
+    focal = W / 2.
     
+    fx, fy, err = pinhole_focal(W, H, theta_h, theta_v)
+    print("before calibration")
+    print(f"fx: {fx:.2f}, fy: {fy:.2f}, err: {err:.2f}")
+
     # set optimize params 
     learning_rate = 0.1
     itr = 100
