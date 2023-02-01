@@ -20,11 +20,9 @@ if __name__ == '__main__':
             y_nu = (y - cy) / focal
 
             # calc radial distortion coeff
-            # theta = np.arccos(1 / np.sqrt((x_nu ** 2 + y_nu ** 2 + 1)))
-            theta = np.arctan(np.sqrt(x_nu ** 2 + y_nu ** 2))
-
-            ru = focal * theta
-            rd = focal * np.arctan(ru / focal)
+            # theta = np.arctan(np.sqrt(x_nu ** 2 + y_nu ** 2))
+            ru = np.sqrt(x_nu ** 2 + y_nu ** 2) # tan(theta) = np.sqrt(x_nu ** 2 + y_nu ** 2)
+            rd = np.arctan(ru)
 
             # apply it to points
             x_nd = (rd / ru) * x_nu
@@ -39,8 +37,8 @@ if __name__ == '__main__':
     stacked_image = np.vstack((u_image, d_image))
     resized_image = cv2.resize(stacked_image, dsize=(0, 0), fx=0.4, fy=0.4)
 
-    cv2.imshow('compare image', resized_image)
+    # cv2.imshow('compare image', resized_image)
+    print(rd/ru)
+    # cv2.waitKey(0)
 
-    cv2.waitKey(0)
-
-    cv2.imwrite('cam3_undistorted.png', stacked_image)
+    cv2.imwrite('cam3_undistorted_v2.png', stacked_image)
