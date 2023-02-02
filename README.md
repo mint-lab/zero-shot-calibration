@@ -51,7 +51,11 @@ then it will save the undistorted image.
 
 Example result:
 
-<img src="20210812_084000_000_0400_undistort.png" align="left"  width = "40%" height = "40%">
-<img src="20210812_084000_000_0500_undistort.png" align="right" width = "40%" height = "40%">
-<img src="20210812_084000_000_0600_undistort.png" align="left"  width = "40%" height = "40%">
-<img src="20210812_084000_000_0700_undistort.png" align="right" width = "40%" height = "40%">
+<img src="20210812_084000_000_0400_undistort.png"  width = "40%" height = "40%">
+<img src="20210812_084000_000_0500_undistort.png"  width = "40%" height = "40%">
+<img src="20210812_084000_000_0600_undistort.png"  width = "40%" height = "40%">
+<img src="20210812_084000_000_0700_undistort.png"  width = "40%" height = "40%">
+<!-- align="left" 
+align="right"
+align="left" 
+align="right" -->
