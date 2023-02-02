@@ -53,7 +53,6 @@ Example result:
 
 <img src="20210812_084000_000_0400_undistort.png" align="left"  width = "47%" height = "47%">
 <img src="20210812_084000_000_0500_undistort.png" align="right"  width = "47%" height = "47%">
-공백
 <img src="20210812_084000_000_0600_undistort.png" align="left"  width = "47%" height = "47%">
 <img src="20210812_084000_000_0700_undistort.png" align="right"  width = "47%" height = "47%">
  
