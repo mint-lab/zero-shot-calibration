@@ -2,6 +2,49 @@ import argparse
 import numpy as np
 import cv2
 from copy import deepcopy
+from scipy.spatial.transform import Rotation as R
+
+def zshot_undistort_pixels(pixels: np.ndarray,
+                        K: np.ndarray)-> np.ndarray:
+    inv_K = np.linalg.inv(K)
+    # (n, 2) -> (n, 3)
+    pixels = np.array([[px[0], px[1], 1] for px in pixels], dtype=np.float32)
+
+    # distorted pixel -> normed image plane
+    d_pts = pixels @ inv_K.T
+    d_pts = np.array([[pt[0] / pt[2], pt[1] / pt[2], 1] for pt in d_pts], dtype=np.float32)
+
+    # calc distort
+    r_d = np.sqrt(d_pts[:, 0] ** 2 + d_pts[:, 1] ** 2)
+    r_u = np.tan(r_d)
+
+    u_pts = (r_u / r_d)[:, np.newaxis] * d_pts
+    u_pts = np.array([[pt[0], pt[1], 1] for pt in u_pts], dtype=np.float32)
+    u_pixels = u_pts @ K.T
+
+    return u_pixels[:, :2]
+
+def zshot_distort_points(pts: np.ndarray,
+                         K: np.ndarray,
+                         rvec: np.ndarray = np.zeros((3,), dtype=np.float32),
+                         tvec: np.ndarray = np.zeros((3,), dtype=np.float32))-> np.ndarray:
+    # from world to camera
+    pts = R.from_rotvec(rvec).apply(pts) + tvec
+    
+    # from camera to normed image plane
+    pts = np.array([[pt[0] / pt[2], pt[1] / pt[2], 1] for pt in pts], dtype=np.float32)
+
+    # apply distort
+    ru = np.sqrt(pts[:, 0] ** 2 + pts[:, 1] ** 2)
+    rd = np.arctan(ru)
+
+    # apply it to points
+    pts *= (rd / ru)[:, np.newaxis]
+    pts = np.array([[pt[0] / pt[2], pt[1] / pt[2], 1] for pt in pts], dtype=np.float32)
+    
+    # project to pixel plane
+    return (pts @ K.T)[:, :2] 
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -22,7 +65,7 @@ if __name__ == '__main__':
 
     for y in range(height):
         for x in range(width):
-            # calc normalized undistorted pixel
+            # calc normalized undistorted pixel, (x, y) is not distorted pixels!
             x_nu = (x - cx) / focal
             y_nu = (y - cy) / focal
 
@@ -42,8 +85,5 @@ if __name__ == '__main__':
 
     stacked_image = np.vstack((u_image, d_image))
     resized_image = cv2.resize(stacked_image, dsize=(0, 0), fx=0.4, fy=0.4)
-
-    # cv2.imshow('compare image', resized_image)
-    # cv2.waitKey(0)
 
     cv2.imwrite(output_image, stacked_image)
