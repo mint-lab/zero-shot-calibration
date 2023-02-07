@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 from copy import deepcopy
 from scipy.spatial.transform import Rotation as R
+import json
 
 def zshot_undistort_pixels(pixels: np.ndarray,
                         K: np.ndarray)-> np.ndarray:
@@ -23,6 +24,35 @@ def zshot_undistort_pixels(pixels: np.ndarray,
     u_pixels = u_pts @ K.T
 
     return u_pixels[:, :2]
+
+def zshot_undistort_image(img: np.ndarray,
+                          focal: float)-> np.ndarray:
+    height, width, _ = img.shape
+    cx, cy = (width - 1) / 2, (height - 1) / 2
+
+    u_image = deepcopy(img)
+
+    for y in range(height):
+        for x in range(width):
+            # calc normalized undistorted pixel, (x, y) is not distorted pixels!
+            x_nu = (x - cx) / focal
+            y_nu = (y - cy) / focal
+
+            # calc radial distortion coeff
+            ru = np.sqrt(x_nu ** 2 + y_nu ** 2) # tan(theta) = np.sqrt(x_nu ** 2 + y_nu ** 2)
+            rd = np.arctan(ru)
+
+            # apply it to points
+            x_nd = (rd / ru) * x_nu
+            y_nd = (rd / ru) * y_nu
+
+            # # apply it back to points
+            x_pd = focal * x_nd + cx
+            y_pd = focal * y_nd + cy
+
+            u_image[y, x] = img[int(y_pd), int(x_pd)]
+    
+    return u_image
 
 def zshot_distort_points(pts: np.ndarray,
                          K: np.ndarray,
@@ -45,10 +75,9 @@ def zshot_distort_points(pts: np.ndarray,
     # project to pixel plane
     return (pts @ K.T)[:, :2] 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_image', type=str, default='20210812_084000_000_0000.png')
+    parser.add_argument('--input_image', type=str, default='20210812_084000_000_0400.png')
     parser.add_argument('--focal', type=float, default=1021.9253974248712)
     parser.add_argument('--output_image', type=str, default='output.png')
     args = parser.parse_args()
@@ -57,33 +86,40 @@ if __name__ == '__main__':
     focal = args.focal
     output_image = args.output_image
 
+    # Get distorted image information
     d_image = cv2.imread(image_path)
-    height, width, _ = d_image.shape
-    cx, cy = (width - 1) / 2, (height - 1) / 2
+    Height, Width, _ = d_image.shape
+    cx, cy = (Width - 1) / 2, (Height - 1) / 2
 
-    u_image = deepcopy(d_image)
+    # # set intrinsic
+    # K = np.array([
+    #     [focal, 0, cx],
+    #     [0, focal, cy],
+    #     [0, 0, 1]
+    # ], dtype=np.float32)
 
-    for y in range(height):
-        for x in range(width):
-            # calc normalized undistorted pixel, (x, y) is not distorted pixels!
-            x_nu = (x - cx) / focal
-            y_nu = (y - cy) / focal
+    # with open('ETRI_44markers_images.json', 'r') as f:
+    #     tmp_list = json.load(f)
+    
+    # for tmp in tmp_list:
+    #     if tmp['file'] == image_path:
+    #         d_pixel = np.array(tmp['idx_pixels'])[:, 1:]
+    
+    # draw circle in distorted image
+    # for d_px in d_pixel:
+    #     d_image = cv2.circle(d_image, (int(d_px[0]), int(d_px[1])), 10, (0, 255, 0), -1)
 
-            # calc radial distortion coeff
-            ru = np.sqrt(x_nu ** 2 + y_nu ** 2) # tan(theta) = np.sqrt(x_nu ** 2 + y_nu ** 2)
-            rd = np.arctan(ru)
+    # get undistorted image
+    u_image = zshot_undistort_image(d_image, focal)
+    # u_pixel = zshot_undistort_pixels(d_pixel, K)
 
-            # apply it to points
-            x_nd = (rd / ru) * x_nu
-            y_nd = (rd / ru) * y_nu
+    # draw pixels
+    # for u_px in u_pixel:
+    #     u_image = cv2.circle(u_image, (int(u_px[0]), int(u_px[1])), 10, (0, 255, 0), -1)
 
-            # # apply it back to points
-            x_pd = focal * x_nd + cx
-            y_pd = focal * y_nd + cy
 
-            u_image[y, x] = d_image[int(y_pd), int(x_pd)]
+    # cv2.imwrite(output_image, u_image)
+    # cv2.imwrite('distorted_image.png', d_image)
+    cv2.imwrite(image_path[:-4] + '_undistort' + image_path[-4:], u_image)
 
-    stacked_image = np.vstack((u_image, d_image))
-    resized_image = cv2.resize(stacked_image, dsize=(0, 0), fx=0.4, fy=0.4)
-
-    cv2.imwrite(output_image, stacked_image)
+    # cv2.waitKey(0)
